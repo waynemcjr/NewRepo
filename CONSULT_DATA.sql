@@ -1,3 +1,6 @@
+USE SneezePharma
+GO
+
 --Join clientes ativos
 select c.idCliente, CONCAT(c.Nome, ' ', c.Sobrenome) as Nome, c.CPF, c.DataNascimento, c.DataCadastro,
 sc.Situacao,
@@ -85,7 +88,7 @@ m.Nome, m.ValorVenda as ValorUnitario, (iv.Quantidade * m.ValorVenda) as ValorTo
 v.DataVenda
 from Vendas v
 JOIN Clientes c
-ON c.idCliente = v.idVenda
+ON c.idCliente = v.idCliente
 JOIN ItensVendas iv
 ON iv.idVenda = v.idVenda
 JOIN Medicamentos m

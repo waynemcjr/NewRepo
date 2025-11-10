@@ -1,4 +1,3 @@
--- Adding triggers to database
 USE SneezePharma;
 GO
 
@@ -57,23 +56,25 @@ BEGIN
 END;
 GO
 
-CREATE TRIGGER TG_LIMITE_ITENS_POR_VENDA
-ON ItensVendas
-FOR INSERT
+CREATE TRIGGER TG_LIMITE_ITENS_POR_VENDA ON ItensVendas
+AFTER INSERT, UPDATE
 AS
 BEGIN
+    SET NOCOUNT ON;
+
     IF EXISTS (
-        SELECT i.idVenda
-        FROM inserted i
-        JOIN ItensVendas iv ON iv.idVenda = i.idVenda
-        GROUP BY i.idVenda
-        HAVING COUNT(iv.idMedicamento) > 3
+        SELECT 1
+        FROM ItensVendas iv
+        WHERE iv.idVenda IN (SELECT DISTINCT idVenda FROM inserted)
+        GROUP BY iv.idVenda
+        HAVING COUNT(*) > 3
     )
     BEGIN
         RAISERROR('Cada venda pode conter no máximo 3 itens.', 16, 1);
         ROLLBACK TRANSACTION;
     END
 END;
+GO
 GO
 
 CREATE TRIGGER TG_BLOQUEAR_COMPRA_FORNECEDOR_INATIVO
@@ -131,17 +132,18 @@ BEGIN
 END;
 GO
 
-CREATE TRIGGER TG_LIMITE_ITENS_POR_COMPRA
-ON ItensCompras
-FOR INSERT
+CREATE TRIGGER TG_LIMITE_ITENS_POR_COMPRA ON ItensCompras
+AFTER INSERT, UPDATE
 AS
 BEGIN
+    SET NOCOUNT ON;
+
     IF EXISTS (
-        SELECT i.idCompra
-        FROM inserted i
-        JOIN ItensCompras c ON c.idCompra = i.idCompra
-        GROUP BY i.idCompra
-        HAVING COUNT(c.idPrincipio) > 3
+        SELECT 1
+        FROM ItensCompras ic
+        WHERE ic.idCompra IN (SELECT DISTINCT idCompra FROM inserted)
+        GROUP BY ic.idCompra
+        HAVING COUNT(*) > 3
     )
     BEGIN
         RAISERROR('Cada compra pode conter no máximo 3 itens.', 16, 1);
@@ -185,5 +187,165 @@ BEGIN
         RAISERROR('Esse princípio ativo está inativo!', 16, 1);
         ROLLBACK TRANSACTION;
     END
+END;
+GO
+
+CREATE TRIGGER TG_BLOQUEAR_DELETE_CATEGORIAS
+ON Categorias
+FOR DELETE
+AS
+BEGIN
+    RAISERROR ('Não é possível fazer a exclusão de dados nessa tabela!', 16, 1);
+    ROLLBACK TRANSACTION;
+END;
+GO
+
+CREATE TRIGGER TG_BLOQUEAR_DELETE_CLIENTES
+ON Clientes
+FOR DELETE
+AS
+BEGIN
+    RAISERROR ('Não é possível fazer a exclusão de dados nessa tabela!', 16, 1);
+    ROLLBACK TRANSACTION;
+END;
+GO
+
+CREATE TRIGGER TG_BLOQUEAR_DELETE_COMPRAS
+ON Compras
+FOR DELETE
+AS
+BEGIN
+    RAISERROR ('Não é possível fazer a exclusão de dados nessa tabela!', 16, 1);
+    ROLLBACK TRANSACTION;
+END;
+GO
+
+CREATE TRIGGER TG_BLOQUEAR_DELETE_FORNECEDORES
+ON Fornecedores
+FOR DELETE
+AS
+BEGIN
+    RAISERROR ('Não é possível fazer a exclusão de dados nessa tabela!', 16, 1);
+    ROLLBACK TRANSACTION;
+END;
+GO
+
+CREATE TRIGGER TG_BLOQUEAR_DELETE_INGREDIENTES
+ON Ingredientes
+FOR DELETE
+AS
+BEGIN
+    RAISERROR ('Não é possível fazer a exclusão de dados nessa tabela!', 16, 1);
+    ROLLBACK TRANSACTION;
+END;
+GO
+
+CREATE TRIGGER TG_BLOQUEAR_DELETE_ITENSCOMPRAS
+ON ItensCompras
+FOR DELETE
+AS
+BEGIN
+    RAISERROR ('Não é possível fazer a exclusão de dados nessa tabela!', 16, 1);
+    ROLLBACK TRANSACTION;
+END;
+GO
+
+CREATE TRIGGER TG_BLOQUEAR_DELETE_ITENSVENDAS
+ON ItensVendas
+FOR DELETE
+AS
+BEGIN
+    RAISERROR ('Não é possível fazer a exclusão de dados nessa tabela!', 16, 1);
+    ROLLBACK TRANSACTION;
+END;
+GO
+
+CREATE TRIGGER TG_BLOQUEAR_DELETE_MEDICAMENTOS
+ON Medicamentos
+FOR DELETE
+AS
+BEGIN
+    RAISERROR ('Não é possível fazer a exclusão de dados nessa tabela!', 16, 1);
+    ROLLBACK TRANSACTION;
+END;
+GO
+
+CREATE TRIGGER TG_BLOQUEAR_DELETE_PRINCIPIOSATIVOS
+ON PrincipiosAtivos
+FOR DELETE
+AS
+BEGIN
+    RAISERROR ('Não é possível fazer a exclusão de dados nessa tabela!', 16, 1);
+    ROLLBACK TRANSACTION;
+END;
+GO
+
+CREATE TRIGGER TG_BLOQUEAR_DELETE_PRODUCOES
+ON Producoes
+FOR DELETE
+AS
+BEGIN
+    RAISERROR ('Não é possível fazer a exclusão de dados nessa tabela!', 16, 1);
+    ROLLBACK TRANSACTION;
+END;
+GO
+
+CREATE TRIGGER TG_BLOQUEAR_DELETE_SITUACAOCLIENTE
+ON SituacaoCliente
+FOR DELETE
+AS
+BEGIN
+    RAISERROR ('Não é possível fazer a exclusão de dados nessa tabela!', 16, 1);
+    ROLLBACK TRANSACTION;
+END;
+GO
+
+CREATE TRIGGER TG_BLOQUEAR_DELETE_SITUACAOFORNECEDOR
+ON SituacaoFornecedor
+FOR DELETE
+AS
+BEGIN
+    RAISERROR ('Não é possível fazer a exclusão de dados nessa tabela!', 16, 1);
+    ROLLBACK TRANSACTION;
+END;
+GO
+
+CREATE TRIGGER TG_BLOQUEAR_DELETE_SITUACAOMEDICAMENTO
+ON SituacaoMedicamento
+FOR DELETE
+AS
+BEGIN
+    RAISERROR ('Não é possível fazer a exclusão de dados nessa tabela!', 16, 1);
+    ROLLBACK TRANSACTION;
+END;
+GO
+
+CREATE TRIGGER TG_BLOQUEAR_DELETE_SITUACAOPRINCIPIOATIVO
+ON SituacaoPrincipioAtivo
+FOR DELETE
+AS
+BEGIN
+    RAISERROR ('Não é possível fazer a exclusão de dados nessa tabela!', 16, 1);
+    ROLLBACK TRANSACTION;
+END;
+GO
+
+CREATE TRIGGER TG_BLOQUEAR_DELETE_TELEFONESCLIENTES
+ON TelefonesClientes
+FOR DELETE
+AS
+BEGIN
+    RAISERROR ('Não é possível fazer a exclusão de dados nessa tabela!', 16, 1);
+    ROLLBACK TRANSACTION;
+END;
+GO
+
+CREATE TRIGGER TG_BLOQUEAR_DELETE_VENDAS
+ON Vendas
+FOR DELETE
+AS
+BEGIN
+    RAISERROR ('Não é possível fazer a exclusão de dados nessa tabela!', 16, 1);
+    ROLLBACK TRANSACTION;
 END;
 GO
