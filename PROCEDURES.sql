@@ -1,3 +1,6 @@
+USE SneezePharma
+GO
+
 -- Procedure relatório de compras por fornecedor
 CREATE PROCEDURE sp_ComprasFornecedor
 AS
@@ -82,8 +85,8 @@ BEGIN
 END;
 GO
 
---Procedure de inativar cliente
-CREATE OR ALTER PROCEDURE sp_InativarCliente
+--Procedure de desativar cliente
+CREATE OR ALTER PROCEDURE sp_DesativarCliente
 	@idCliente INT
 AS
 BEGIN
@@ -107,6 +110,118 @@ BEGIN
 		RETURN;
 	END
 	UPDATE Clientes SET Situacao = 1 WHERE idCliente = @idCliente
+END;
+GO
+
+--Procedure Desativar fornecedor
+CREATE OR ALTER PROC sp_DesativarFornecedor
+	@idFornecedor INT
+AS
+BEGIN
+	IF((SELECT Situacao FROM Fornecedores WHERE idFornecedor = @idFornecedor) = 2)
+	BEGIN
+		RAISERROR('Fornecedor já está inativo!', 16, 1)
+		RETURN;
+	END
+	UPDATE Fornecedores SET Situacao = 2 WHERE idFornecedor = @idFornecedor
+END;
+GO
+
+--Ativar fornecedor
+CREATE OR ALTER PROC sp_AtivarFornecedor
+	@idFornecedor INT
+AS
+BEGIN
+	IF((SELECT Situacao FROM Fornecedores WHERE idFornecedor = @idFornecedor) = 1)
+	BEGIN
+		RAISERROR('Fornecedor já está ativo!', 16, 1)
+		RETURN;
+	END
+	UPDATE Fornecedores SET Situacao = 1 WHERE idFornecedor = @idFornecedor
+END;
+GO
+
+--Procedure desativar medicamento
+CREATE OR ALTER PROC sp_DesativarMedicamento
+	@idMedicamento INT
+AS
+BEGIN
+	IF((SELECT Situacao FROM Medicamentos WHERE idMedicamento = @idMedicamento) = 2)
+	BEGIN
+		RAISERROR('Medicamento já está inativo!', 16, 1)
+		RETURN;
+	END
+	UPDATE Medicamentos SET Situacao = 2 WHERE idMedicamento = @idMedicamento
+END;
+GO
+
+--Procedure Ativar medicamento
+CREATE OR ALTER PROC sp_AtivarMedicamento
+	@idMedicamento INT
+AS
+BEGIN
+	IF((SELECT Situacao FROM Medicamentos WHERE idMedicamento = @idMedicamento) = 1)
+	BEGIN
+		RAISERROR('Medicamento já está ativo!', 16, 1)
+		RETURN;
+	END
+	UPDATE Medicamentos SET Situacao = 1 WHERE idMedicamento = @idMedicamento
+END;
+GO
+
+--Procedure cadastro medicamento
+CREATE OR ALTER PROC sp_CadastrarMedicamento
+	@CDB VARCHAR(13),
+	@Nome VARCHAR(40),
+	@Categoria INT,
+	@ValorVenda DECIMAL(6,2),
+	@Situacao INT
+AS
+BEGIN
+	INSERT INTO Medicamentos(CDB, Nome, Categoria, ValorVenda, DataCadastro, Situacao)
+	VALUES(@CDB, @Nome, @Categoria, @ValorVenda, GETDATE(), @Situacao)
+END;
+GO
+
+--Procedure de inserção de produção
+CREATE OR ALTER PROCEDURE sp_RegistrarProducao
+    @idMedicamento INT,
+    @dataProducao DATE,
+    @quantidade INT,
+    @idPrincipio INT,
+    @quantidadePrincipio INT
+AS
+BEGIN
+    DECLARE @idProducao INT;
+
+    INSERT INTO Producoes (DataProducao, idMedicamento, Quantidade)
+    VALUES (@dataProducao, @idMedicamento, @quantidade);
+
+    SET @idProducao = SCOPE_IDENTITY();
+
+    INSERT INTO Ingredientes (idProducao, idPrincipio, Quantidade)
+    VALUES (@idProducao, @idPrincipio, @quantidadePrincipio);
+END;
+GO
+
+--Procedure inserção de compras
+CREATE OR ALTER PROCEDURE sp_RegistrarCompra
+    @IdFornecedor INT,
+    @DataCompra DATE,
+    @IdPrincipio INT,
+    @Quantidade INT,
+    @ValorUnitario DECIMAL(6,2)
+AS
+BEGIN
+    DECLARE @IdCompra INT;
+
+    INSERT INTO Compras (idFornecedor, DataCompra)
+    VALUES (@IdFornecedor, @DataCompra);
+
+    SET @IdCompra = SCOPE_IDENTITY();
+
+    INSERT INTO ItensCompras (idCompra, idPrincipio, Quantidade, ValorUnitario)
+    SELECT @IdCompra, @IdPrincipio, @Quantidade, @ValorUnitario;
 END;
 GO
 
